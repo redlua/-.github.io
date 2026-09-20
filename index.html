@@ -4,19 +4,19 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Discord PFP Debug</title>
+<title>Discord PFP</title>
 <style>
 html,body{
   margin:0;
   width:100%;
   height:100%;
   background:#111;
-  color:white;
-  font-family:Arial;
   display:flex;
   align-items:center;
   justify-content:center;
+  font-family:Arial,sans-serif;
 }
+
 #avatar{
   width:300px;
   height:300px;
@@ -24,140 +24,62 @@ html,body{
   border-radius:50%;
   display:none;
 }
+
 #error{
-  max-width:700px;
-  padding:20px;
+  color:white;
   text-align:center;
-  white-space:pre-wrap;
+  font-size:18px;
 }
 </style>
 </head>
+
 <body>
 
-<img id="avatar">
 <div id="error">Loading...</div>
+<img id="avatar">
 
 <script>
-console.log("========== DISCORD PFP DEBUG ==========")
-
-const params = new URLSearchParams(location.search)
-const id = params.get("id")
-
-console.log("[1] Current URL:", location.href)
-console.log("[2] ID from URL:", id)
+const id = new URLSearchParams(location.search).get("id")
 
 const avatar = document.getElementById("avatar")
 const error = document.getElementById("error")
 
+console.log("Discord PFP")
+console.log("User ID:", id)
+
 if (!/^\d{17,20}$/.test(id || "")) {
-  console.error("[ERROR] Invalid Discord User ID:", id)
+
+  console.error("Invalid Discord User ID:", id)
+
   error.textContent = "Invalid Discord User ID"
+
 } else {
 
-  const apiUrl = "https://discord.com/api/v10/users/" + id
+  const url =
+    "https://discord.tsunstudio.pw/api/pfp/" +
+    id +
+    "/image?size=1024"
 
-  console.log("[3] Discord API URL:", apiUrl)
-  console.log("[4] Sending request...")
+  console.log("Avatar API:", url)
 
-  fetch(apiUrl)
-    .then(response => {
+  avatar.src = url
 
-      console.log("[5] Discord response received")
-      console.log("[6] Status:", response.status)
-      console.log("[7] Status text:", response.statusText)
-      console.log("[8] Response OK:", response.ok)
+  avatar.onload = () => {
 
-      if (!response.ok) {
-        return response.text().then(text => {
-          console.error("[ERROR] Discord API response body:", text)
-          throw new Error(
-            "Discord API returned HTTP " +
-            response.status
-          )
-        })
-      }
+    console.log("Avatar loaded successfully!")
 
-      return response.json()
-    })
-    .then(user => {
+    error.style.display = "none"
+    avatar.style.display = "block"
+  }
 
-      console.log("[9] Discord user data:", user)
-      console.log("[10] Username:", user.username)
-      console.log("[11] User ID:", user.id)
-      console.log("[12] Avatar hash:", user.avatar)
+  avatar.onerror = () => {
 
-      if (!user.avatar) {
-        console.error("[ERROR] User has no avatar.")
-        error.textContent = "This Discord user has no avatar."
-        throw new Error("No avatar")
-      }
+    console.error("Avatar API failed:", url)
 
-      const extension =
-        user.avatar.startsWith("a_")
-          ? "gif"
-          : "png"
-
-      console.log("[13] Avatar extension:", extension)
-
-      const avatarUrl =
-        "https://cdn.discordapp.com/avatars/" +
-        id + "/" +
-        user.avatar +
-        "." +
-        extension +
-        "?size=1024"
-
-      console.log("[14] Avatar URL:", avatarUrl)
-      console.log("[15] Loading avatar...")
-
-      avatar.src = avatarUrl
-
-      avatar.onload = () => {
-        console.log("[16] SUCCESS! Avatar loaded.")
-        console.log("[17] Final image URL:", avatar.src)
-
-        error.style.display = "none"
-        avatar.style.display = "block"
-
-        document.title =
-          user.username + "'s Discord PFP"
-      }
-
-      avatar.onerror = () => {
-        console.error("[ERROR] Avatar CDN image failed to load.")
-        console.error("[ERROR] Image URL:", avatar.src)
-
-        error.textContent =
-          "Discord returned the user, but the avatar image failed to load."
-      }
-    })
-    .catch(err => {
-
-      console.error("========== REQUEST FAILED ==========")
-      console.error("[ERROR]", err)
-      console.error("[ERROR NAME]", err.name)
-      console.error("[ERROR MESSAGE]", err.message)
-
-      if (err instanceof TypeError) {
-        console.error(
-          "[IMPORTANT] This is probably a CORS/network error."
-        )
-
-        error.textContent =
-          "The browser blocked the Discord API request.\n\n" +
-          "Open F12 → Console and check the red error."
-      } else if (
-        error.textContent === "Loading..."
-      ) {
-        error.textContent =
-          "Couldn't retrieve this Discord user's avatar.\n\n" +
-          "Check F12 → Console for details."
-      }
-    })
-
+    error.textContent =
+      "Couldn't retrieve this Discord user's avatar."
+  }
 }
-
-console.log("========== DEBUG STARTED ==========")
 </script>
 
 </body>
