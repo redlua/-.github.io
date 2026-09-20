@@ -2,71 +2,32 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Discord PFP</title>
-  <style>
-    html,body {
-      margin:0;
-      width:100%;
-      height:100%;
-      background:#111;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      font-family:Arial,sans-serif;
-    }
+<meta charset="UTF-8">
+<script>
+const pathSegmentsToKeep = 1
+const location = window.location
 
-    img {
-      width:300px;
-      height:300px;
-      object-fit:cover;
-      border-radius:50%;
-      display:none;
-    }
-
-    #error {
-      color:white;
-      display:none;
-    }
-  </style>
+location.replace(
+  location.protocol + "//" +
+  location.hostname +
+  (location.port ? ":" + location.port : "") +
+  location.pathname.split("/")
+    .slice(0, 1 + pathSegmentsToKeep)
+    .join("/") +
+  "/?p=/" +
+  location.pathname.slice(1)
+    .split("/")
+    .slice(pathSegmentsToKeep)
+    .join("/")
+    .replace(/&/g, "~and~") +
+  (location.search
+    ? "&" + location.search.slice(1).replace(/&/g, "~and~")
+    : "") +
+  location.hash
+)
+</script>
 </head>
 <body>
-
-<img id="avatar">
-<div id="error">User not found</div>
-
-<script>
-const id = location.pathname.split("/").filter(Boolean).pop()
-const avatar = document.getElementById("avatar")
-const error = document.getElementById("error")
-
-if (!/^\d{17,20}$/.test(id)) {
-  error.textContent = "Invalid Discord User ID"
-  error.style.display = "block"
-} else {
-  fetch(`https://discord.com/api/v10/users/${id}`)
-    .then(res => {
-      if (!res.ok) throw new Error()
-      return res.json()
-    })
-    .then(user => {
-      if (!user.avatar) throw new Error()
-
-      const ext = user.avatar.startsWith("a_") ? "gif" : "png"
-
-      avatar.src =
-        `https://cdn.discordapp.com/avatars/${id}/${user.avatar}.${ext}?size=1024`
-
-      avatar.style.display = "block"
-      document.title = `${user.username}'s Discord PFP`
-    })
-    .catch(() => {
-      error.textContent = "Discord user not found"
-      error.style.display = "block"
-    })
-}
-</script>
-
 </body>
 </html>
+
