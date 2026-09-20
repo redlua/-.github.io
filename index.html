@@ -1,27 +1,21 @@
-```html
 <!DOCTYPE html>
 <html>
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Discord PFP</title>
+
 <style>
 html,body{
   margin:0;
   width:100%;
-  min-height:100%;
+  height:100%;
   background:#111;
-  color:#fff;
+  color:white;
   font-family:Arial,sans-serif;
   display:flex;
   align-items:center;
   justify-content:center;
-}
-
-#container{
-  text-align:center;
-  max-width:700px;
-  padding:20px;
 }
 
 #avatar{
@@ -33,90 +27,65 @@ html,body{
 }
 
 #error{
+  text-align:center;
   white-space:pre-wrap;
-  font-family:monospace;
-  font-size:14px;
-  text-align:left;
-  word-break:break-word;
-}
-
-#status{
-  margin-bottom:20px;
 }
 </style>
 </head>
 
 <body>
 
-<div id="container">
-
-  <div id="status">Loading...</div>
-
-  <img id="avatar" alt="Discord Avatar">
-
-  <div id="error"></div>
-
-</div>
+<div id="error">Loading...</div>
+<img id="avatar" alt="Discord Avatar">
 
 <script>
-const status = document.getElementById("status")
-const avatar = document.getElementById("avatar")
-const error = document.getElementById("error")
-
 const params = new URLSearchParams(location.search)
 const id = params.get("id")
 
-console.log("========== DISCORD PFP SEARCHER ==========")
+const avatar = document.getElementById("avatar")
+const error = document.getElementById("error")
+
+console.log("========== DISCORD PFP ==========")
 console.log("Current URL:", location.href)
-console.log("User ID:", id)
+console.log("Discord User ID:", id)
 
 if (!/^\d{17,20}$/.test(id || "")) {
 
-  status.textContent = "Invalid Discord User ID"
+  console.error("Invalid Discord User ID")
 
-  console.error("Invalid ID:", id)
+  error.textContent = "Invalid Discord User ID"
 
 } else {
 
-  const apiUrl =
-    "https://discord.tsunstudio.pw/api/pfp/" +
-    encodeURIComponent(id) +
-    "/bigimage"
+  const api =
+    "https://discordpfp.vercel.app/api/avatar?id=" +
+    encodeURIComponent(id)
 
-  console.log("PFP API URL:", apiUrl)
+  console.log("Using API:", api)
 
-  status.textContent = "Fetching avatar..."
+  error.textContent = "Loading avatar..."
 
-  avatar.onload = function () {
+  avatar.onload = () => {
 
     console.log("SUCCESS: Avatar loaded")
-    console.log("Image URL:", avatar.src)
 
-    status.textContent = ""
-
-    error.textContent = ""
-
+    error.style.display = "none"
     avatar.style.display = "block"
   }
 
-  avatar.onerror = function () {
+  avatar.onerror = () => {
 
-    console.error("FAILED: Avatar image could not be loaded")
-
-    status.textContent = "Failed to load avatar"
+    console.error("FAILED: Avatar could not be loaded")
+    console.error("API:", api)
 
     error.textContent =
-      "The PFP API did not return an image.\n\n" +
-      "User ID:\n" + id + "\n\n" +
-      "API:\n" + apiUrl + "\n\n" +
-      "Open the API URL directly in your browser.\n" +
-      "If it returns an error, the API service is unavailable."
+      "Couldn't retrieve this Discord user's avatar.\n\n" +
+      "API request failed."
   }
 
-  avatar.src = apiUrl
+  avatar.src = api
 }
 </script>
 
 </body>
 </html>
-```
